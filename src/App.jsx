@@ -24,6 +24,7 @@ export default function App() {
                      bg-gray-200 dark:bg-gray-700 
                      hover:bg-gray-300 dark:hover:bg-gray-600 
                      transition"
+          aria-label={darkMode ? "Switch to light mode" : "Switch to dark mode"}
         >
           {darkMode ? "☀️ Light Mode" : "🌙 Dark Mode"}
         </button>

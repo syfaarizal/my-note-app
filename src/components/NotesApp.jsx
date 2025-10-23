@@ -180,6 +180,7 @@ export default function TodoNotesApp() {
   const [tasks, setTasks] = useState([]);
   const [notes, setNotes] = useState([]);
   const [theme, setTheme] = useState("default");
+  const [loading, setLoading] = useState(true);
 
   // Task states
   const [newTaskTitle, setNewTaskTitle] = useState("");
@@ -218,30 +219,50 @@ export default function TodoNotesApp() {
   // Auto Theme
   const [autoTheme, setAutoTheme] = useState(false);
 
+  // Theme handler - MOVED UP to fix ReferenceError
+  const handleTheme = async (t) => {
+    setTheme(t);
+    try {
+      await MockDB.setTheme(t);
+    } catch (e) {
+      console.error("Failed to save theme", e);
+    }
+  };
+
+  const currentTheme = themes[theme] || themes.default;
+
   useEffect(() => {
     (async () => {
-      let ts = await MockDB.getTasks();
-      let ns = await MockDB.getNotes();
-      let th = await MockDB.getTheme();
-      if (ts.length === 0) {
-        ts = [
-          { id: uuid(), title: "Belajar React", category: "Study", completed: false, reminderAt: null },
-          { id: uuid(), title: "Workout 20 menit", category: "Sport", completed: false, reminderAt: null },
-        ];
-        await MockDB.setTasks(ts);
-      }
-      if (ns.length === 0) {
-        ns = [
-          { id: uuid(), title: "Ide proyek", content: "Tuliskan detail proyek di sini.", color: "yellow", sticker: "✨" },
-        ];
-        await MockDB.setNotes(ns);
-      }
-      setTasks(ts);
-      setNotes(ns);
-      setTheme(th);
+      try {
+        let ts = await MockDB.getTasks();
+        let ns = await MockDB.getNotes();
+        let th = await MockDB.getTheme();
+        
+        if (ts.length === 0) {
+          ts = [
+            { id: uuid(), title: "Belajar React", category: "Study", completed: false, reminderAt: null },
+            { id: uuid(), title: "Workout 20 menit", category: "Sport", completed: false, reminderAt: null },
+          ];
+          await MockDB.setTasks(ts);
+        }
+        if (ns.length === 0) {
+          ns = [
+            { id: uuid(), title: "Ide proyek", content: "Tuliskan detail proyek di sini.", color: "yellow", sticker: "✨" },
+          ];
+          await MockDB.setNotes(ns);
+        }
+        setTasks(ts);
+        setNotes(ns);
+        setTheme(th);
 
-      // auto theme initial
-      if (autoTheme) applyAutoTheme();
+        // auto theme initial
+        if (autoTheme) applyAutoTheme();
+      } catch (error) {
+        console.error("Failed to load data:", error);
+        pushToast("Failed to load data");
+      } finally {
+        setLoading(false);
+      }
     })();
   }, []);
 
@@ -277,18 +298,6 @@ export default function TodoNotesApp() {
     setTheme(t);
     await MockDB.setTheme(t);
   };
-
-  // NEW: handleTheme was missing and caused ReferenceError — implement it here
-  const handleTheme = async (t) => {
-    setTheme(t);
-    try {
-      await MockDB.setTheme(t);
-    } catch (e) {
-      console.error("Failed to save theme", e);
-    }
-  };
-
-  const currentTheme = themes[theme] || themes.default;
 
   /*************** Tasks ***************/
   const addTask = async () => {
@@ -372,7 +381,6 @@ export default function TodoNotesApp() {
       await MockDB.updateNote(editingNote);
       // reflect
       setNotes((p) => p.map((n) => (n.id === editingNote.id ? editingNote : n)));
-      pushToast("Note autosaved");
       // also save to idb for sync convenience
       try { await idbSet("notes", notes.map((n) => (n.id === editingNote.id ? editingNote : n))); } catch (e) { /* ignore */ }
     }, 800);
@@ -442,14 +450,19 @@ export default function TodoNotesApp() {
   };
 
   const syncData = async () => {
-    await idbSet("tasks", tasks);
-    await idbSet("notes", notes);
-    await idbSet("theme", theme);
-    const [ts, ns, th] = await Promise.all([idbGet("tasks"), idbGet("notes"), idbGet("theme")]);
-    if (ts) { await MockDB.setTasks(ts); setTasks(ts); }
-    if (ns) { await MockDB.setNotes(ns); setNotes(ns); }
-    if (th) { await MockDB.setTheme(th); setTheme(th); }
-    pushToast("Data synced successfully");
+    try {
+      await idbSet("tasks", tasks);
+      await idbSet("notes", notes);
+      await idbSet("theme", theme);
+      const [ts, ns, th] = await Promise.all([idbGet("tasks"), idbGet("notes"), idbGet("theme")]);
+      if (ts) { await MockDB.setTasks(ts); setTasks(ts); }
+      if (ns) { await MockDB.setNotes(ns); setNotes(ns); }
+      if (th) { await MockDB.setTheme(th); setTheme(th); }
+      pushToast("Data synced successfully");
+    } catch (error) {
+      pushToast("Sync failed");
+      console.error("Sync error:", error);
+    }
   };
 
   /*************** Filters ***************/
@@ -467,6 +480,17 @@ export default function TodoNotesApp() {
 
   /*************** UI helpers ***************/
   const noteSnippet = (s) => (s ? s.slice(0, 30) + (s.length > 30 ? "..." : "") : "(no content)");
+
+  if (loading) {
+    return (
+      <div className={`${currentTheme.bg} min-h-screen ${currentTheme.text} flex items-center justify-center`}>
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto"></div>
+          <p className="mt-4">Loading your tasks and notes...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className={`${currentTheme.bg} min-h-screen ${currentTheme.text} p-6 transition-colors`}> 
