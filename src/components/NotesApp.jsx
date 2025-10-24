@@ -142,13 +142,13 @@ const idbGet = async (key) => {
  *************************/
 const themes = {
   default: { bg: "bg-white", text: "text-gray-900", accent: "text-blue-500", card: "bg-white", chip: "bg-gray-100" },
-  blue:    { bg: "bg-blue-50", text: "text-blue-950", accent: "text-blue-500", card: "bg-blue-100", chip: "bg-blue-100" },
-  pink:    { bg: "bg-pink-50", text: "text-pink-900", accent: "text-pink-500", card: "bg-pink-100", chip: "bg-pink-100" },
-  pastel:  { bg: "bg-violet-50", text: "text-violet-900", accent: "text-violet-500", card: "bg-violet-100", chip: "bg-violet-100" },
-  cream:   { bg: "bg-amber-50", text: "text-amber-900", accent: "text-amber-500", card: "bg-amber-100", chip: "bg-amber-100" },
-  green:   { bg: "bg-green-50", text: "text-green-900", accent: "text-green-500", card: "bg-green-100", chip: "bg-green-100" },
-  red:     { bg: "bg-rose-50", text: "text-rose-900", accent: "text-rose-500", card: "bg-rose-100", chip: "bg-rose-100" },
-  dark:    { bg: "bg-gray-900", text: "text-gray-100", accent: "text-gray-400", card: "bg-gray-800", chip: "bg-gray-700" },
+  blue:    { bg: "bg-blue-200", text: "text-blue-950", accent: "text-blue-500", card: "bg-blue-100", chip: "bg-blue-100" },
+  pink:    { bg: "bg-pink-200", text: "text-pink-900", accent: "text-pink-500", card: "bg-pink-100", chip: "bg-pink-100" },
+  pastel:  { bg: "bg-violet-200", text: "text-violet-900", accent: "text-violet-500", card: "bg-violet-100", chip: "bg-violet-100" },
+  cream:   { bg: "bg-amber-100", text: "text-amber-900", accent: "text-amber-500", card: "bg-amber-100", chip: "bg-amber-100" },
+  green:   { bg: "bg-green-100", text: "text-green-900", accent: "text-green-500", card: "bg-green-100", chip: "bg-green-100" },
+  red:     { bg: "bg-rose-200", text: "text-rose-900", accent: "text-rose-500", card: "bg-rose-100", chip: "bg-rose-100" },
+  dark:    { bg: "bg-gray-1000", text: "text-gray-200", accent: "text-gray-300", card: "bg-gray-900", chip: "bg-gray-900" },
 };
 const SWATCHES = [
   { key: "default", cls: "bg-white border" },
@@ -165,6 +165,7 @@ const NOTE_COLORS = {
   blue: { cls: "bg-blue-100 text-blue-900", dark: "bg-blue-900 text-blue-100" },
   pink: { cls: "bg-pink-100 text-pink-900", dark: "bg-pink-900 text-pink-100" },
   green: { cls: "bg-green-100 text-green-900", dark: "bg-green-900 text-green-100" },
+ cream: { cls: "bg-amber-100 text-amber-900", dark: "bg-amber-900 text-amber-100" },
 };
 
 /*************************
@@ -653,6 +654,7 @@ export default function TodoNotesApp() {
               <option value="blue">Blue</option>
               <option value="pink">Pink</option>
               <option value="green">Green</option>
+              <option value="cream">Cream</option>
             </select>
             <select aria-label="Note sticker" value={newNoteSticker} onChange={(e) => setNewNoteSticker(e.target.value)} className="sm:col-span-2 border rounded-2xl px-2 py-2 shadow focus:ring bg-transparent">
               {STICKERS.map(s => <option key={s} value={s}>{s}</option>)}
@@ -710,6 +712,7 @@ export default function TodoNotesApp() {
                     <option value="blue">Blue</option>
                     <option value="pink">Pink</option>
                     <option value="green">Green</option>
+                    <option value="cream">Cream</option>
                   </select>
                   <select value={editingNote.sticker} onChange={(e) => setEditingNote({ ...editingNote, sticker: e.target.value })} className="rounded-xl px-2 py-1 border bg-transparent">
                     {STICKERS.map(s => <option key={s} value={s}>{s}</option>)}
@@ -730,7 +733,7 @@ export default function TodoNotesApp() {
 
       {/* Footer */}
       <footer className="mt-10 text-center text-sm opacity-70">
-        Made with ❤️ by <span className="font-semibold">SICODER</span>
+        Made with ❤️ by <span className="font-semibold">SICODER .</span>
       </footer>
     </div>
   );
